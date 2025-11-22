@@ -1,0 +1,38 @@
+name: Build Wasm Calculator
+
+# trigger this when we push to the main branch
+on:
+  push:
+    branches: [ "main" ]
+  # allows you to click "run" manually in github actions tab
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. get your code
+      - uses: actions/checkout@v3
+
+      # 2. setup emscripten (the c++ to web compiler)
+      # this action handles the complex install process for us
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: 3.1.44 # pinning a version is safer for stability
+
+      # 3. actually run the build script
+      - name: Compile C++ to Wasm
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      # 4. save the result
+      # this uploads the 'public' folder so you can download it from the github ui
+      # later, you can add a 'vercel deploy' step here if you want auto-deploy
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-calculator-build
+          path: public/
