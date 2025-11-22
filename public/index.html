@@ -23,7 +23,7 @@
             padding: 20px; 
             border-radius: 20px; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-            width: 320px; 
+            width: 340px; /* Slightly wider for scientific buttons */
         }
 
         /* DISPLAY SCREEN */
@@ -43,49 +43,46 @@
         }
 
         /* BUTTONS GRID */
-        /* This keeps the buttons locked in 4 columns */
         .buttons { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            gap: 12px; 
+            gap: 10px; 
         }
 
         /* BUTTON STYLING */
         button { 
-            padding: 20px; 
-            font-size: 1.5rem; 
+            padding: 15px; 
+            font-size: 1.2rem; 
             border: none; 
-            border-radius: 12px; 
+            border-radius: 10px; 
             cursor: pointer; 
             background: #3a3a3a; 
             color: white; 
             outline: none;
             user-select: none;
-            
-            /* The Animation Transition */
             transition: background-color 0.2s, opacity 0.2s, box-shadow 0.3s ease-out;
         }
 
-        button:hover { 
-            background: #4a4a4a; 
-        }
+        button:hover { background: #4a4a4a; }
 
-        /* THE PULSE EFFECT (Active State) */
+        /* PULSE ANIMATION */
         button:active {
             opacity: 0.7;
-            /* The instant glow ring */
             box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
             transition: none; 
         }
 
         /* COLORS */
-        .op { background: #ff9f0a; color: black; font-weight: 600; }
+        .op { background: #ff9f0a; color: black; font-weight: bold; }
         .op:hover { background: #ffb03b; }
 
-        .clear { background: #ff453a; color: white; font-weight: 600; }
+        .clear { background: #ff453a; color: white; font-weight: bold; }
         .clear:hover { background: #ff6961; }
 
-        .equals { background: #32d74b; color: black; font-weight: 600; }
+        .trig { background: #303030; color: #64d2ff; font-weight: bold; }
+        .trig:hover { background: #404040; }
+
+        .equals { background: #32d74b; color: black; font-weight: bold; }
         .equals:hover { background: #5ce57f; }
 
     </style>
@@ -97,24 +94,29 @@
     
     <div class="buttons">
         <button class="clear" onclick="clearDisplay()">C</button>
-        <button onclick="input('/')" class="op">÷</button>
-        <button onclick="input('*')" class="op">×</button>
-        <button onclick="input('-')" class="op">−</button>
-        
+        <button class="trig" onclick="runTrig('sin')">sin</button>
+        <button class="trig" onclick="runTrig('cos')">cos</button>
+        <button class="trig" onclick="runTrig('tan')">tan</button>
+
         <button onclick="input('7')">7</button>
         <button onclick="input('8')">8</button>
         <button onclick="input('9')">9</button>
-        <button onclick="input('+')" class="op">+</button>
+        <button onclick="input('/')" class="op">÷</button>
         
         <button onclick="input('4')">4</button>
         <button onclick="input('5')">5</button>
         <button onclick="input('6')">6</button>
-        <button class="equals" onclick="calculate()">=</button>
+        <button onclick="input('*')" class="op">×</button>
 
         <button onclick="input('1')">1</button>
         <button onclick="input('2')">2</button>
         <button onclick="input('3')">3</button>
+        <button onclick="input('-')" class="op">−</button>
+
         <button onclick="input('0')">0</button>
+        <button onclick="input('.')">.</button>
+        <button class="equals" onclick="calculate()">=</button>
+        <button onclick="input('+')" class="op">+</button>
     </div>
 </div>
 
@@ -133,15 +135,33 @@
         document.getElementById('display').value = "0";
     }
 
+    // --- TRIGONOMETRY LOGIC ---
+    function runTrig(type) {
+        let val = parseFloat(currentInput);
+        if(isNaN(val)) val = 0;
+        let result = 0;
+
+        try {
+            if(type === 'sin') result = Module._api_sin(val);
+            if(type === 'cos') result = Module._api_cos(val);
+            if(type === 'tan') result = Module._api_tan(val);
+
+            // Clean up decimal precision
+            result = parseFloat(result.toFixed(8));
+            
+            document.getElementById('display').value = result;
+            currentInput = result.toString();
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    // --- STANDARD MATH LOGIC ---
     function calculate() {
-        // Your logic to find the operator
         let operator = currentInput.match(/[\+\-\*\/]/);
-        
         if (!operator) return;
         
         let parts = currentInput.split(operator[0]);
-        
-        // Basic error check
         if(parts.length < 2) return;
 
         let a = parseFloat(parts[0]);

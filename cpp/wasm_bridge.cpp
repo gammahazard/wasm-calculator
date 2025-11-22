@@ -1,10 +1,15 @@
 #include <emscripten.h>
+#include <cmath> // Required for sin, cos, tan
 // bringing in our math logic from before
 #include "add.h"
 #include "subtract.h"
 #include "multiply.h"
 #include "divide.h"
 
+//helper to convert to radians
+double to_rad(double degrees) {
+    return degrees * M_PI / 180.0;
+}
 // extern "C" tells the c++ compiler not to mangle the names
 // so javascript can actually find them
 extern "C" {
@@ -37,4 +42,13 @@ extern "C" {
         if (!ok) return 999999999; 
         return result;
     }
+    //trig functions
+    EMSCRIPTEN_KEEPALIVE
+    double api_sin(double a) { return sin(to_rad(a)); }
+
+    EMSCRIPTEN_KEEPALIVE
+    double api_cos(double a) { return cos(to_rad(a)); }
+
+    EMSCRIPTEN_KEEPALIVE
+    double api_tan(double a) { return tan(to_rad(a)); }
 }
