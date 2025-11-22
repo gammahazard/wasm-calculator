@@ -1621,6 +1621,8 @@ var _api_divide = Module['_api_divide'] = makeInvalidEarlyAccess('_api_divide');
 var _api_sin = Module['_api_sin'] = makeInvalidEarlyAccess('_api_sin');
 var _api_cos = Module['_api_cos'] = makeInvalidEarlyAccess('_api_cos');
 var _api_tan = Module['_api_tan'] = makeInvalidEarlyAccess('_api_tan');
+var _api_sqrt = Module['_api_sqrt'] = makeInvalidEarlyAccess('_api_sqrt');
+var _api_pow = Module['_api_pow'] = makeInvalidEarlyAccess('_api_pow');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
@@ -1641,6 +1643,8 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['api_sin'] != 'undefined', 'missing Wasm export: api_sin');
   assert(typeof wasmExports['api_cos'] != 'undefined', 'missing Wasm export: api_cos');
   assert(typeof wasmExports['api_tan'] != 'undefined', 'missing Wasm export: api_tan');
+  assert(typeof wasmExports['api_sqrt'] != 'undefined', 'missing Wasm export: api_sqrt');
+  assert(typeof wasmExports['api_pow'] != 'undefined', 'missing Wasm export: api_pow');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['emscripten_stack_init'] != 'undefined', 'missing Wasm export: emscripten_stack_init');
   assert(typeof wasmExports['emscripten_stack_get_free'] != 'undefined', 'missing Wasm export: emscripten_stack_get_free');
@@ -1658,6 +1662,8 @@ function assignWasmExports(wasmExports) {
   _api_sin = Module['_api_sin'] = createExportWrapper('api_sin', 1);
   _api_cos = Module['_api_cos'] = createExportWrapper('api_cos', 1);
   _api_tan = Module['_api_tan'] = createExportWrapper('api_tan', 1);
+  _api_sqrt = Module['_api_sqrt'] = createExportWrapper('api_sqrt', 1);
+  _api_pow = Module['_api_pow'] = createExportWrapper('api_pow', 2);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];

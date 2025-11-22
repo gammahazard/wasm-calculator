@@ -51,4 +51,18 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     double api_tan(double a) { return tan(to_rad(a)); }
+
+
+    //sqrt/power
+    EMSCRIPTEN_KEEPALIVE
+    double api_sqrt(double a) {
+        if (a < 0) return -1; // Basic error handling for negative roots
+        return sqrt(a);
+    }
+
+    // Power (Binary) - like 2^3
+    EMSCRIPTEN_KEEPALIVE
+    double api_pow(double base, double exponent) {
+        return pow(base, exponent);
+    }
 }
