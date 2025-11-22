@@ -12,15 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. get your code
-      - uses: actions/checkout@v3
+      # 1. get your code (Updated to v4)
+      - uses: actions/checkout@v4
 
       # 2. setup emscripten (the c++ to web compiler)
-      # this action handles the complex install process for us
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v12
+        uses: mymindstorm/setup-emsdk@v14
         with:
-          version: 3.1.44 # pinning a version is safer for stability
+          version: 3.1.44 
 
       # 3. actually run the build script
       - name: Compile C++ to Wasm
@@ -28,11 +27,9 @@ jobs:
           chmod +x build.sh
           ./build.sh
 
-      # 4. save the result
-      # this uploads the 'public' folder so you can download it from the github ui
-      # later, you can add a 'vercel deploy' step here if you want auto-deploy
+      # 4. save the result (Updated to v4 - FIXES YOUR ERROR)
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-calculator-build
           path: public/
