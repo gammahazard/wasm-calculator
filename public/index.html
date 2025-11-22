@@ -5,96 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wasm Calculator</title>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #111;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+        /* BASE RESET */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #111; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
         }
 
-        .calculator {
-            background: #1c1c1c;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            width: 320px;
-            
-            /* CSS GRID LAYOUT - This fixes the alignment */
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+        /* CALCULATOR CONTAINER */
+        .calculator { 
+            background: #1c1c1c; 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+            width: 320px; 
         }
 
-        /* Styling the Input to look like a screen */
-        #display {
-            grid-column: span 4;
-            background: #2c2c2c;
-            border: none;
-            color: white;
-            font-size: 3rem;
-            text-align: right;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            width: 100%; /* Ensure it fills the grid cell */
-            box-sizing: border-box; /* Fix padding issues */
+        /* DISPLAY SCREEN */
+        #display { 
+            width: 100%; 
+            height: 70px; 
+            background: #2c2c2c; 
+            border: none; 
+            color: white; 
+            font-size: 2.5rem; 
+            text-align: right; 
+            padding: 15px; 
+            box-sizing: border-box; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
             outline: none;
         }
 
-        button {
-            padding: 20px;
-            font-size: 1.5rem;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            color: white;
-            background: #3a3a3a;
+        /* BUTTONS GRID */
+        /* This keeps the buttons locked in 4 columns */
+        .buttons { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 12px; 
+        }
+
+        /* BUTTON STYLING */
+        button { 
+            padding: 20px; 
+            font-size: 1.5rem; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: #3a3a3a; 
+            color: white; 
             outline: none;
-            user-select: none; /* Prevents highlighting text on double click */
+            user-select: none;
             
-            /* The Pulse Animation Setup */
+            /* The Animation Transition */
             transition: background-color 0.2s, opacity 0.2s, box-shadow 0.3s ease-out;
         }
 
-        button:hover {
-            background: #4a4a4a;
+        button:hover { 
+            background: #4a4a4a; 
         }
 
-        /* THE PULSE EFFECT ON CLICK */
+        /* THE PULSE EFFECT (Active State) */
         button:active {
             opacity: 0.7;
+            /* The instant glow ring */
             box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
-            transition: none;
+            transition: none; 
         }
 
-        /* Operator Colors (Orange) */
-        .op {
-            background-color: #ff9f0a;
-            color: black;
-            font-weight: 600;
-        }
-        .op:hover { background-color: #ffb03b; }
+        /* COLORS */
+        .op { background: #ff9f0a; color: black; font-weight: 600; }
+        .op:hover { background: #ffb03b; }
 
-        /* Clear Button (Red) */
-        .clear {
-            background-color: #ff453a;
-            color: white;
-            font-weight: 600;
-        }
-        .clear:hover { background-color: #ff6961; }
+        .clear { background: #ff453a; color: white; font-weight: 600; }
+        .clear:hover { background: #ff6961; }
 
-        /* Equals Button (Green) - Spans 2 Columns */
-        .equals {
-            background-color: #32d74b;
-            color: black;
-            font-weight: 600;
-            grid-column: span 2;
-        }
-        .equals:hover { background-color: #5ce57f; }
+        .equals { background: #32d74b; color: black; font-weight: 600; }
+        .equals:hover { background: #5ce57f; }
 
     </style>
 </head>
@@ -102,26 +94,28 @@
 
 <div class="calculator">
     <input type="text" id="display" readonly value="0">
-
-    <button class="clear" onclick="clearDisplay()">C</button>
-    <button onclick="input('/')" class="op">÷</button>
-    <button onclick="input('*')" class="op">×</button>
-    <button onclick="input('-')" class="op">−</button>
     
-    <button onclick="input('7')">7</button>
-    <button onclick="input('8')">8</button>
-    <button onclick="input('9')">9</button>
-    <button onclick="input('+')" class="op">+</button>
-    
-    <button onclick="input('4')">4</button>
-    <button onclick="input('5')">5</button>
-    <button onclick="input('6')">6</button>
-    <button class="equals" onclick="calculate()">=</button>
+    <div class="buttons">
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button onclick="input('/')" class="op">÷</button>
+        <button onclick="input('*')" class="op">×</button>
+        <button onclick="input('-')" class="op">−</button>
+        
+        <button onclick="input('7')">7</button>
+        <button onclick="input('8')">8</button>
+        <button onclick="input('9')">9</button>
+        <button onclick="input('+')" class="op">+</button>
+        
+        <button onclick="input('4')">4</button>
+        <button onclick="input('5')">5</button>
+        <button onclick="input('6')">6</button>
+        <button class="equals" onclick="calculate()">=</button>
 
-    <button onclick="input('1')">1</button>
-    <button onclick="input('2')">2</button>
-    <button onclick="input('3')">3</button>
-    <button onclick="input('0')">0</button>
+        <button onclick="input('1')">1</button>
+        <button onclick="input('2')">2</button>
+        <button onclick="input('3')">3</button>
+        <button onclick="input('0')">0</button>
+    </div>
 </div>
 
 <script src="calculator.js"></script>
@@ -130,8 +124,6 @@
     let currentInput = "";
 
     function input(val) {
-        // Prevent multiple operators or weird starts if you want, 
-        // but keeping it simple as per your request.
         currentInput += val;
         document.getElementById('display').value = currentInput;
     }
@@ -142,15 +134,14 @@
     }
 
     function calculate() {
-        // Simple regex parser
+        // Your logic to find the operator
         let operator = currentInput.match(/[\+\-\*\/]/);
         
         if (!operator) return;
         
-        // Split on the operator
         let parts = currentInput.split(operator[0]);
         
-        // Safety check for incomplete inputs
+        // Basic error check
         if(parts.length < 2) return;
 
         let a = parseFloat(parts[0]);
@@ -158,18 +149,12 @@
         let op = operator[0];
         let result = 0;
 
-        // Call WebAssembly using underscore syntax (Standard for exported functions)
-        // Ensure your build.sh exported these functions!
         try {
             if (op === '+') result = Module._api_add(a, b);
             if (op === '-') result = Module._api_subtract(a, b);
             if (op === '*') result = Module._api_multiply(a, b);
             if (op === '/') {
-                if(b === 0) {
-                    alert("Divide by Zero");
-                    clearDisplay();
-                    return;
-                }
+                if(b === 0) { alert("Error"); clearDisplay(); return; }
                 result = Module._api_divide(a, b);
             }
 
@@ -177,7 +162,6 @@
             currentInput = result.toString();
         } catch(e) {
             console.error(e);
-            alert("Wasm module not loaded or error occurred");
         }
     }
 </script>
