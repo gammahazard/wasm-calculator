@@ -23,13 +23,13 @@
             padding: 20px; 
             border-radius: 20px; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-            width: 340px; /* Slightly wider for scientific buttons */
+            width: 340px; 
         }
 
         /* DISPLAY SCREEN */
         #display { 
             width: 100%; 
-            height: 70px; 
+            height: 80px; 
             background: #2c2c2c; 
             border: none; 
             color: white; 
@@ -40,6 +40,7 @@
             border-radius: 12px; 
             margin-bottom: 20px; 
             outline: none;
+            word-wrap: break-word;
         }
 
         /* BUTTONS GRID */
@@ -79,8 +80,9 @@
         .clear { background: #ff453a; color: white; font-weight: bold; }
         .clear:hover { background: #ff6961; }
 
-        .trig { background: #303030; color: #64d2ff; font-weight: bold; }
-        .trig:hover { background: #404040; }
+        /* Scientific Functions (Cyan) */
+        .sci { background: #303030; color: #64d2ff; font-weight: bold; }
+        .sci:hover { background: #404040; }
 
         .equals { background: #32d74b; color: black; font-weight: bold; }
         .equals:hover { background: #5ce57f; }
@@ -93,30 +95,33 @@
     <input type="text" id="display" readonly value="0">
     
     <div class="buttons">
+        <button class="sci" onclick="runUnary('sin')">sin</button>
+        <button class="sci" onclick="runUnary('cos')">cos</button>
+        <button class="sci" onclick="runUnary('tan')">tan</button>
+        <button class="sci" onclick="runUnary('sqrt')">√</button>
+
         <button class="clear" onclick="clearDisplay()">C</button>
-        <button class="trig" onclick="runTrig('sin')">sin</button>
-        <button class="trig" onclick="runTrig('cos')">cos</button>
-        <button class="trig" onclick="runTrig('tan')">tan</button>
+        <button class="sci" onclick="input('^')">xʸ</button>
+        <button class="sci" onclick="runUnary('sq')">x²</button> <button onclick="input('/')" class="op">÷</button>
 
         <button onclick="input('7')">7</button>
         <button onclick="input('8')">8</button>
         <button onclick="input('9')">9</button>
-        <button onclick="input('/')" class="op">÷</button>
-        
+        <button onclick="input('*')" class="op">×</button>
+
         <button onclick="input('4')">4</button>
         <button onclick="input('5')">5</button>
         <button onclick="input('6')">6</button>
-        <button onclick="input('*')" class="op">×</button>
+        <button onclick="input('-')" class="op">−</button>
 
         <button onclick="input('1')">1</button>
         <button onclick="input('2')">2</button>
         <button onclick="input('3')">3</button>
-        <button onclick="input('-')" class="op">−</button>
+        <button onclick="input('+')" class="op">+</button>
 
         <button onclick="input('0')">0</button>
         <button onclick="input('.')">.</button>
-        <button class="equals" onclick="calculate()">=</button>
-        <button onclick="input('+')" class="op">+</button>
+        <button class="equals" onclick="calculate()" style="grid-column: span 2;">=</button>
     </div>
 </div>
 
@@ -135,8 +140,9 @@
         document.getElementById('display').value = "0";
     }
 
-    // --- TRIGONOMETRY LOGIC ---
-    function runTrig(type) {
+    // --- UNARY LOGIC (1 Number functions) ---
+    // Handles Sin, Cos, Tan, Sqrt, Square
+    function runUnary(type) {
         let val = parseFloat(currentInput);
         if(isNaN(val)) val = 0;
         let result = 0;
@@ -145,20 +151,38 @@
             if(type === 'sin') result = Module._api_sin(val);
             if(type === 'cos') result = Module._api_cos(val);
             if(type === 'tan') result = Module._api_tan(val);
+            
+            // Square Root
+            if(type === 'sqrt') {
+                if(val < 0) {
+                    alert("Cannot sqrt negative number");
+                    return;
+                }
+                result = Module._api_sqrt(val);
+            }
 
-            // Clean up decimal precision
+            // Quick x^2 helper (uses power logic or just JS)
+            if(type === 'sq') {
+                result = Module._api_pow(val, 2);
+            }
+
+            // Fix precision issues (e.g. sin(180) returning 0.0000000001)
             result = parseFloat(result.toFixed(8));
             
             document.getElementById('display').value = result;
             currentInput = result.toString();
         } catch(e) {
-            console.error(e);
+            console.error("Wasm Error:", e);
+            alert("Error: Function not found. Did you re-run ./build.sh?");
         }
     }
 
-    // --- STANDARD MATH LOGIC ---
+    // --- BINARY LOGIC (2 Number functions) ---
+    // Handles +, -, *, /, ^
     function calculate() {
-        let operator = currentInput.match(/[\+\-\*\/]/);
+        // Regex now includes '^' for power
+        let operator = currentInput.match(/[\+\-\*\/^]/);
+        
         if (!operator) return;
         
         let parts = currentInput.split(operator[0]);
@@ -173,9 +197,15 @@
             if (op === '+') result = Module._api_add(a, b);
             if (op === '-') result = Module._api_subtract(a, b);
             if (op === '*') result = Module._api_multiply(a, b);
+            
             if (op === '/') {
-                if(b === 0) { alert("Error"); clearDisplay(); return; }
+                if(b === 0) { alert("Divide by Zero"); clearDisplay(); return; }
                 result = Module._api_divide(a, b);
+            }
+
+            // Power logic
+            if (op === '^') {
+                result = Module._api_pow(a, b);
             }
 
             document.getElementById('display').value = result;

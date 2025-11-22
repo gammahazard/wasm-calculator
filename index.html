@@ -5,47 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wasm Calculator</title>
     <style>
-        /* making it look modern and dark mode */
-        body { font-family: 'Segoe UI', sans-serif; background: #111; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .calculator { background: #222; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px; }
-        #display { width: 100%; height: 60px; background: #333; border: none; color: white; font-size: 2rem; text-align: right; padding: 10px; box-sizing: border-box; border-radius: 8px; margin-bottom: 15px; }
-        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        button { padding: 20px; font-size: 1.2rem; border: none; border-radius: 8px; cursor: pointer; background: #444; color: white; transition: 0.1s; }
-        button:hover { background: #555; }
-        button.op { background: #f39c12; color: black; }
-        button.op:hover { background: #e67e22; }
-        button.clear { background: #c0392b; }
-        button.equals { background: #27ae60; grid-column: span 2; }
+        /* BASE RESET */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #111; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+
+        /* CALCULATOR CONTAINER */
+        .calculator { 
+            background: #1c1c1c; 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+            width: 340px; 
+        }
+
+        /* DISPLAY SCREEN */
+        #display { 
+            width: 100%; 
+            height: 80px; 
+            background: #2c2c2c; 
+            border: none; 
+            color: white; 
+            font-size: 2.5rem; 
+            text-align: right; 
+            padding: 15px; 
+            box-sizing: border-box; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            outline: none;
+            word-wrap: break-word;
+        }
+
+        /* BUTTONS GRID */
+        .buttons { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+        }
+
+        /* BUTTON STYLING */
+        button { 
+            padding: 15px; 
+            font-size: 1.2rem; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            background: #3a3a3a; 
+            color: white; 
+            outline: none;
+            user-select: none;
+            transition: background-color 0.2s, opacity 0.2s, box-shadow 0.3s ease-out;
+        }
+
+        button:hover { background: #4a4a4a; }
+
+        /* PULSE ANIMATION */
+        button:active {
+            opacity: 0.7;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+            transition: none; 
+        }
+
+        /* COLORS */
+        .op { background: #ff9f0a; color: black; font-weight: bold; }
+        .op:hover { background: #ffb03b; }
+
+        .clear { background: #ff453a; color: white; font-weight: bold; }
+        .clear:hover { background: #ff6961; }
+
+        /* Scientific Functions (Cyan) */
+        .sci { background: #303030; color: #64d2ff; font-weight: bold; }
+        .sci:hover { background: #404040; }
+
+        .equals { background: #32d74b; color: black; font-weight: bold; }
+        .equals:hover { background: #5ce57f; }
+
     </style>
 </head>
 <body>
 
 <div class="calculator">
     <input type="text" id="display" readonly value="0">
+    
     <div class="buttons">
+        <button class="sci" onclick="runUnary('sin')">sin</button>
+        <button class="sci" onclick="runUnary('cos')">cos</button>
+        <button class="sci" onclick="runUnary('tan')">tan</button>
+        <button class="sci" onclick="runUnary('sqrt')">√</button>
+
         <button class="clear" onclick="clearDisplay()">C</button>
-        <button onclick="input('/')" class="op">/</button>
-        <button onclick="input('*')" class="op">*</button>
-        <button onclick="input('-')" class="op">-</button>
-        
+        <button class="sci" onclick="input('^')">xʸ</button>
+        <button class="sci" onclick="runUnary('sq')">x²</button> <button onclick="input('/')" class="op">÷</button>
+
         <button onclick="input('7')">7</button>
         <button onclick="input('8')">8</button>
         <button onclick="input('9')">9</button>
-        <button onclick="input('+')" class="op">+</button>
-        
+        <button onclick="input('*')" class="op">×</button>
+
         <button onclick="input('4')">4</button>
         <button onclick="input('5')">5</button>
         <button onclick="input('6')">6</button>
-        <button class="equals" onclick="calculate()">=</button>
+        <button onclick="input('-')" class="op">−</button>
 
         <button onclick="input('1')">1</button>
         <button onclick="input('2')">2</button>
         <button onclick="input('3')">3</button>
+        <button onclick="input('+')" class="op">+</button>
+
         <button onclick="input('0')">0</button>
+        <button onclick="input('.')">.</button>
+        <button class="equals" onclick="calculate()" style="grid-column: span 2;">=</button>
     </div>
 </div>
 
-<!-- this script is generated by the compiler later -->
 <script src="calculator.js"></script>
 
 <script>
@@ -61,29 +140,79 @@
         document.getElementById('display').value = "0";
     }
 
+    // --- UNARY LOGIC (1 Number functions) ---
+    // Handles Sin, Cos, Tan, Sqrt, Square
+    function runUnary(type) {
+        let val = parseFloat(currentInput);
+        if(isNaN(val)) val = 0;
+        let result = 0;
+
+        try {
+            if(type === 'sin') result = Module._api_sin(val);
+            if(type === 'cos') result = Module._api_cos(val);
+            if(type === 'tan') result = Module._api_tan(val);
+            
+            // Square Root
+            if(type === 'sqrt') {
+                if(val < 0) {
+                    alert("Cannot sqrt negative number");
+                    return;
+                }
+                result = Module._api_sqrt(val);
+            }
+
+            // Quick x^2 helper (uses power logic or just JS)
+            if(type === 'sq') {
+                result = Module._api_pow(val, 2);
+            }
+
+            // Fix precision issues (e.g. sin(180) returning 0.0000000001)
+            result = parseFloat(result.toFixed(8));
+            
+            document.getElementById('display').value = result;
+            currentInput = result.toString();
+        } catch(e) {
+            console.error("Wasm Error:", e);
+            alert("Error: Function not found. Did you re-run ./build.sh?");
+        }
+    }
+
+    // --- BINARY LOGIC (2 Number functions) ---
+    // Handles +, -, *, /, ^
     function calculate() {
-        // we are going to split the string "5+5" to find the operator
-        // this is a simple parser for the ui
-        let operator = currentInput.match(/[\+\-\*\/]/);
+        // Regex now includes '^' for power
+        let operator = currentInput.match(/[\+\-\*\/^]/);
         
         if (!operator) return;
         
         let parts = currentInput.split(operator[0]);
+        if(parts.length < 2) return;
+
         let a = parseFloat(parts[0]);
         let b = parseFloat(parts[1]);
         let op = operator[0];
         let result = 0;
 
-        // HERE IS THE MAGIC
-        // we call the C++ functions using Module._functionName
-        // the underscore (_) is required by emscripten logic
-        if (op === '+') result = Module._api_add(a, b);
-        if (op === '-') result = Module._api_subtract(a, b);
-        if (op === '*') result = Module._api_multiply(a, b);
-        if (op === '/') result = Module._api_divide(a, b);
+        try {
+            if (op === '+') result = Module._api_add(a, b);
+            if (op === '-') result = Module._api_subtract(a, b);
+            if (op === '*') result = Module._api_multiply(a, b);
+            
+            if (op === '/') {
+                if(b === 0) { alert("Divide by Zero"); clearDisplay(); return; }
+                result = Module._api_divide(a, b);
+            }
 
-        document.getElementById('display').value = result;
-        currentInput = result.toString();
+            // Power logic
+            if (op === '^') {
+                result = Module._api_pow(a, b);
+            }
+
+            document.getElementById('display').value = result;
+            currentInput = result.toString();
+        } catch(e) {
+            console.error(e);
+        }
     }
 </script>
 
